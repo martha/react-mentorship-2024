@@ -1,95 +1,93 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client"
+import React from 'react';
+
+import { useRef, useState, useMemo, memo } from 'react';
+
+// move outside the component, so the function isn't recreated every time child is rerendered
+function reverseString(s: string) {
+  console.log('reverse string here', s);
+  return Array.from(s).reverse().join("")
+}
+// object is not equal to an object
 
 export default function Home() {
+
+  // when something changes in the parent, ALL children are also rerendered
+  // even if they don't depend upon that piece of state!
+  const [text, setText] = useState('');
+
+  // most of the time, rerender is fine! but if the app is huge, we might need to optimize
+  // then we could use useMemo for child component and it would not rerender
+
+  // when we re-render Home, Child A and Child B BOTH rerender
+  // but when we re-render Child A, Child B DOES NOT re-render, because it is a child of Home, not of Child A
+
+  // react only rerenders if we change something in the props, or the state
+
+  const [elements, setElements] = useState<string[]>([]);
+
+  // recreate vs. re-render? https://react.dev/learn/rendering-lists
+  // react needs key to identify what the component is, so they know what to re-render
+
+  // TODO - next time
+  // Why does the 1st element in the list rerender when a 2nd element is added (and so on)?
+  const memoizedChildren = useMemo(() => {
+    return elements.map(el => <MemoizedChild key={el} name={el}>{el}<Child name='b'></Child></MemoizedChild>);
+  }, [elements]);
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+    <div>
+      <button onClick={(event) => {setElements([...elements, text])}}>Add</button>
+      <input value={text} onChange={(event) => setText(event.target.value)}></input>
+      {memoizedChildren}
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      {/* <Child name="a">
+        <Child name="b">
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+        </Child>
+      </Child> */}
+    </div>
   );
+
+  // return React.createElement("div", {},
+  //   [React.createElement("input")]
+  // )
 }
+
+function Child({ name, children }) {
+  // useRef can be used to keep a reference regardless of re-renders
+  // not recommended in production but just for us to learn
+  const [text, setText] = useState('');
+  const renderCount = useRef(0);
+  // ref doesn't have to be attached to any specific dom element
+  // it can be attached to any kind of value, and keep the value btwn react renders
+
+
+  // useMemo does not change how often something is rendered, it only prevents recalculation
+  // it's uncommon to use useMemo to return a react node, could just use react's memo instead?
+  // react memo is not a hook - it does prevent components from being rerendered
+  // https://react.dev/reference/react/memo
+  const inverted = useMemo(() => {
+    return reverseString(name);
+  }, [name]);
+  // const inverted = reverseString(name);
+
+  renderCount.current++;
+
+  // let renderCount2 = 0
+  // renderCount2 ++;
+
+  // hydration??
+  return <div suppressHydrationWarning>
+    Name: {name}<br/>
+    Render count: {renderCount.current}<br/>
+      <input value={text} onChange={(event) => setText(event.target.value)}></input>
+    {/* Render count 2: {renderCount2} */}
+    <br/>
+    children: {children}<br/>
+    inverted: {inverted}
+  </div>;
+}
+
+const MemoizedChild = memo(Child);
+// react has default arePropsEqual, but if you need a deep/specific thing you can pass your own

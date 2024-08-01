@@ -1,9 +1,9 @@
 "use client"
 import React from 'react';
-import Session2 from './sessions/Session2';
+import FormBuilder from './homework/reproBug/FormTree';
 
 export default function Home() {
   return (
-    <Session2/>
+    <FormBuilder/>
   );
 }

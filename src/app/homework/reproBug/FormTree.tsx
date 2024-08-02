@@ -33,9 +33,7 @@ export default function FormBuilder() {
   const onSubmit = (data) => console.log(data);
 
   return <FormProvider {...rhfMethods}>
-    <form
-        onSubmit={rhfMethods.handleSubmit(onSubmit)}
-      >
+    <form onSubmit={rhfMethods.handleSubmit(onSubmit)}>
       <FormTree/>
       <Button type='submit'>Log data</Button>
     </form>

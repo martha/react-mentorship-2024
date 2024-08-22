@@ -7,6 +7,7 @@ import {
 } from "@mui/x-tree-view/TreeItem2";
 import { RichTreeView } from "@mui/x-tree-view/RichTreeView";
 import { TreeViewBaseItem } from "@mui/x-tree-view/models";
+import { Reducer } from "react";
 
 interface CustomLabelProps {
   children: string;
@@ -27,12 +28,12 @@ function CustomLabel(props: CustomLabelProps) {
   );
 }
 
-const TreeItemDispatchContext = React.createContext<any>(null);
-
-const CustomTreeItem = React.forwardRef(
-  (props: TreeItem2Props, ref: React.Ref<HTMLLIElement>) => {
+const CustomTreeItem = React.forwardRef(function CustomTreeItem(
+  props: TreeItem2Props,
+  ref: React.Ref<HTMLLIElement>
+) {
     const dispatch = React.useContext(TreeItemDispatchContext);
-    const onClickRemove = (e) => {
+    const onClickRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
       e.stopPropagation();
       dispatch({ type: "DELETE", itemId: props.itemId });
     };
@@ -46,7 +47,7 @@ const CustomTreeItem = React.forwardRef(
         }}
         slotProps={{
           label: {
-            onClickRemove,
+            onClickRemove,  // todo - how to make typescript happy?
           },
         }}
       />
@@ -86,8 +87,7 @@ const DEFAULT_MUI_X_PRODUCTS: TreeViewBaseItem[] = [
 
 const DEFAULT_EXPANDED_ITEMS = ["pickers"];
 
-function reducer(state: TreeViewBaseItem[], action: any) {
-  alert(action.itemId);
+const reducer: Reducer<TreeViewBaseItem[], any> = (state, action) => {
   if (action.type === "DELETE") {
     return state
       .filter((product) => product.id !== action.itemId)
@@ -101,7 +101,9 @@ function reducer(state: TreeViewBaseItem[], action: any) {
   throw Error("Unknown action.");
 }
 
-export default function Demo() {
+const TreeItemDispatchContext = React.createContext<any>(null);
+
+export default function ReducerFormTree() {
   const [products, dispatch] = React.useReducer(
     reducer,
     DEFAULT_MUI_X_PRODUCTS

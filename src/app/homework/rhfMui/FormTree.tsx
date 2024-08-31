@@ -2,11 +2,11 @@ import { FormProvider, useForm, useWatch, Control, useFormContext, useFormState 
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { cloneDeep } from 'lodash-es';
 import { v4 } from 'uuid';
-import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useState } from 'react';
 import FormTreeItem from './FormTreeItem';
 import React from 'react';
 import { Box, Button } from '@mui/material';
-import { getRhfPathMap } from './useUpdateFormStructure';
+import { getItemMap, getRhfPathMap } from './useUpdateFormStructure';
 
 export interface ItemType {
   id: string;
@@ -17,13 +17,43 @@ export default function FormBuilder() {
   const rhfMethods = useForm<ItemType>({
     defaultValues: {
       children: [{
-        id: '53ac568f-0dd9-499e-8a2c-b853c73b0644',
+        id: 'A',
         children: [
           {
-            id: '96625994-8345-4a12-8e6d-c7997e6a6684',
+            id: 'B',
+            children: [
+              {
+                id: 'C',
+              },
+              {
+                id: 'D',
+              },
+              {
+                id: 'E',
+              },
+            ]
           },
           {
-            id: 'b2185e93-0736-4c01-8841-7878d602fb40',
+            id: 'F',
+          },
+          {
+            id: 'G',
+            children: [
+              {
+                id: 'H',
+              },
+              {
+                id: 'I',
+              },
+            ]
+          },
+          {
+            id: 'J',
+            children: [
+              {
+                id: 'K',
+              },
+            ]
           }
         ]
       }]
@@ -40,17 +70,38 @@ export default function FormBuilder() {
   </FormProvider>
 }
 
+const DEFAULT_EXPANDED_ITEMS = ['A'];
+
 const FormTree = () => {
   const { control } = useFormContext();
   const values = useWatch({ control });
 
   const rhfPathMap = getRhfPathMap(values.children);
+  const itemMap = useMemo(
+    () => getItemMap(values as ItemType),
+    [values]
+  );
 
-  return <FormTreeContext.Provider value={{rhfPathMap}}>
+  const [expandedItems, setExpandedItems] = React.useState<string[]>(DEFAULT_EXPANDED_ITEMS);
+  const handleExpandedItemsChange = (
+    event: React.SyntheticEvent,
+    itemIds: string[]
+  ) => {
+    setExpandedItems(itemIds);
+  };
+
+  return <FormTreeContext.Provider value={{
+    rhfPathMap,
+    itemMap,
+    expandItem: (itemId: string) =>
+      setExpandedItems((prev) => [...prev, itemId]),
+  }}>
     <RichTreeView
       items={values.children}
       getItemLabel={(item: ItemType) => item.id}
       slots={{ item: FormTreeItem }}
+      expandedItems={expandedItems}
+      onExpandedItemsChange={handleExpandedItemsChange}
       disableSelection
     />
   </FormTreeContext.Provider>
@@ -58,6 +109,10 @@ const FormTree = () => {
 
 export const FormTreeContext = React.createContext<{
   rhfPathMap: Record<string, string>;
+  itemMap: Record<string, ItemType>;
+  expandItem: (itemId: string) => void;
 }>({
   rhfPathMap: {},
+  itemMap: {},
+  expandItem: (itemId: string) => {},
 });

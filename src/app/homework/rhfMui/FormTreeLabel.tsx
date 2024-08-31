@@ -30,12 +30,14 @@ export default function FormTreeLabel({
   const labelProps = getLabelProps();
 
   const { control } = useFormContext();
-  const { rhfPathMap } = useContext(FormTreeContext);
+  const { rhfPathMap, expandItem, itemMap } = useContext(FormTreeContext);
 
-  const { onDelete } = useUpdateFormStructure(
+  const { onReorder, onDelete, itemPath, canMoveUp, canMoveDown } = useUpdateFormStructure(
     control,
     itemId,
-    rhfPathMap
+    rhfPathMap,
+    itemMap[itemId],
+    expandItem,
   );
 
   return <TreeItem2Label key={id}>
@@ -44,5 +46,13 @@ export default function FormTreeLabel({
       e.stopPropagation();
       onDelete();
     }}>Delete</Button>
+    <Button disabled={!canMoveUp} onClick={(e) => {
+      e.stopPropagation();
+      onReorder('up');
+    }}>Up</Button>
+    <Button disabled={!canMoveDown} onClick={(e) => {
+      e.stopPropagation();
+      onReorder('down');
+    }}>Down</Button>
   </TreeItem2Label>
 }

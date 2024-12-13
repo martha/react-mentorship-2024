@@ -46,7 +46,7 @@ function CustomContent({itemId, onMove, children, ...props}) {
         // console.log('target of drop', itemId);
         // console.log('dragged item', )
         event.preventDefault();
-        onMove(event.dataTransfer.getData('draggedItemId'), itemId, dragOverLocation);
+        onMove(event.dataTransfer.getData('draggedItemId'), itemId, dragOverLocation); // buggy!
       }}
       onDragOver={(event) => {
         const rect = event.target.getBoundingClientRect();
@@ -67,7 +67,7 @@ function CustomContent({itemId, onMove, children, ...props}) {
         event.preventDefault();
       }}
       onDragLeave={(event) => {
-        setDragOverLocation(null)
+        setDragOverLocation(null)  // buggy?
       }}
     >
       <Stack direction='column'>
@@ -103,7 +103,6 @@ const CustomTreeItem = React.forwardRef(function CustomTreeItem(
 
     return (
       <TreeItem2
-        draggable
         ref={ref}
         {...props}
         slots={{
@@ -156,6 +155,7 @@ const DEFAULT_MUI_X_PRODUCTS: TreeViewBaseItem[] = [
 
 const DEFAULT_EXPANDED_ITEMS = ["pickers"];
 
+// todo @martha - would need updates to work recursively
 const reducer: Reducer<TreeViewBaseItem[], any> = (state, action) => {
   if (action.type === "DELETE") {
     return state
@@ -177,7 +177,6 @@ const reducer: Reducer<TreeViewBaseItem[], any> = (state, action) => {
   if (action.type === "MOVE_TO_CHILD") {
     const itemToMove = state.find((product) => product.id === action.itemToMoveId);
 
-    // todo @martha - does not work recursively
     return state
       .filter((product) => product.id !== action.itemToMoveId)
       .map((product) => {

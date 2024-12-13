@@ -15,7 +15,9 @@ export default function Session1() {
 
   // This can be helpful in refactoring apps for performance
 
-  return (
+  // when react rerenders a component, it also rerenders ALL the children, unless you memoize
+
+  return ( // containment? composition
     <>
       Parent input: <input value={parentText} onChange={(event) => setParentText(event.target.value)}></input>
       <br/><br/>

@@ -26,6 +26,7 @@ export default function Session3() {
   const clear = useCallback(() => {
     setText('');
   }, [setText]);
+  // if not using memo, don't need to usecallback
 
   // Should we use useCallback every time?
   // - don't use it unless we really need it; it's adding complexity and making the code harder to read

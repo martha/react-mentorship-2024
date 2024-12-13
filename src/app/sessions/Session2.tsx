@@ -40,6 +40,7 @@ export default function Session2() {
   //   {/* todo - I think it has to do w/ adding the non-memoized child here */}
   //   <Child name='b'/>
   // </MemoizedChild>);
+  // should you add memo everywhere
 
   return (
     <>
